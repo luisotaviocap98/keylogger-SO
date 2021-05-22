@@ -1,0 +1,20 @@
+#compilar o módulo
+make 
+
+#limpar logs do kernel
+sudo dmesg -C
+
+#carregar o módulo
+sudo insmod modulo.ko
+
+#remover o módulo
+sudo rmmod modulo
+
+#ver logs gerados (teclas capturadas)
+dmesg
+    ou
+cat /sys/kernel/debug/kisni/keys
+    ou
+cat /var/log/kern.log
+    ou
+cat cat /dev/modulo
