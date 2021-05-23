@@ -1,7 +1,8 @@
 #instalar as dependências
 sudo apt-get install build-essential linux-headers-$(uname -r)
 
-#desabilite o secure boot (após os comandos, reinicie o computador)
+#desabilite o secure boot 
+#(após os comandos, reinicie o computador, na tela azul selecione a opção "Change Secure Boot", e digite os digitos da senha (*** ATENÇÃO: serão pedidos digitos especificos, não a senha toda ***))
 sudo apt install mokutil
 sudo mokutil --disable-validation 
 
