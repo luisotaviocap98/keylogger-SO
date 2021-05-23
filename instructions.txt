@@ -1,3 +1,10 @@
+#instalar as dependências
+sudo apt-get install build-essential linux-headers-$(uname -r)
+
+#desabilite o secure boot (após os comandos, reinicie o computador)
+sudo apt install mokutil
+sudo mokutil --disable-validation 
+
 #compilar o módulo
 make 
 
